@@ -1,4 +1,4 @@
-# DSH-MobileAI（移动AI）
+# mobileai（移动AI）
 
 > **人在路上任意飘，家里电脑爆缸开工。**
 
@@ -6,7 +6,7 @@
 无需端口转发、无需公网 IP，手机上不装任何 App——浏览器打开一个 URL 即可。
 
 内置默认用例是 **DeepSeek Harness（DSH）Web GUI**：一个专属 URL，手机上直接操作家里电脑的
-全部工具（DeepSeek Harness / Codex / OpenClaw 等）。但 DSH-MobileAI 不关心你跑的是什么——
+全部工具（DeepSeek Harness / Codex / OpenClaw 等）。但 mobileai 不关心你跑的是什么——
 localhost 上的任何服务都可以。
 
 ---
@@ -99,7 +99,7 @@ irm https://dsh.newapi.email/mai/i.ps1 | iex
 ## ⚠️ 安全须知（使用前必读）
 
 1. **你的专属 URL = 访问凭证。** 它等价于那台机器的钥匙：泄露给谁，谁就能操作你的本地服务。
-2. **暴露什么服务由你负责。** DSH-MobileAI 提供通道与身份管理，不审查、不经手、不留存你的流量内容。
+2. **暴露什么服务由你负责。** mobileai 提供通道与身份管理，不审查、不经手、不留存你的流量内容。
 3. **建议只暴露你信任的服务**（如 DSH 这类带审批/沙箱机制的工具），并善用「我的工具」里的 URL 轮换。
 4. 本服务要求目标机器保持开机且网络可达；睡眠/关机期间隧道离线，唤醒后自动重连。
 

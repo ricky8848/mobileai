@@ -10,7 +10,7 @@
  *   4. Runs cloudflared, registers auto-start (launchd / systemd user / schtasks)
  *   5. Heartbeats with machine-code verification (offline-tolerant, revoked => stop)
  *
- * It never touches your tunneled traffic. Audit me: https://github.com/ricky8848/DSH-MobileAI
+ * It never touches your tunneled traffic. Audit me: https://github.com/ricky8848/mobileai
  */
 import { createServer } from 'node:http';
 import { execFileSync, spawn } from 'node:child_process';

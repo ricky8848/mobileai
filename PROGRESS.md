@@ -514,3 +514,12 @@ new dsh/
     全一致（guide/i.sh/i.ps1/app.js/mobileai.mjs）✓。
   - **全仓 grep**：旧仓库名 / 旧安装地址无残留（PROGRESS 历史记录与 Linux unit
     名 `mobile-ai` 为业务命名，保留）。无代码逻辑改动。
+- **2026-09-06（续4 · GitHub 仓库改名：DSH-MobileAI → mobileai）**：
+  - **执行**（用户定案）：`gh repo rename mobileai --repo ricky8848/DSH-MobileAI`
+    → **ricky8848/mobileai**（旧 URL 301 自动跳转，curl -I = HTTP/2 301 ✓）；
+    本地 remote → https://github.com/ricky8848/mobileai.git。
+  - **名称引用跟随（不遗漏）**：README.md 标题 + 正文两处 DSH-MobileAI →
+    mobileai；client/src/mobileai.mjs + control/static/mobileai.mjs「Audit me」
+    URL → ricky8848/mobileai（续3 刚更新为 DSH-MobileAI，本轮再随改名修正）。
+    node --check ✓。PROGRESS 历史条目（mobile-ai→DSH-MobileAI 等）为历史记录，
+    原样保留。全仓 grep：DSH-MobileAI 仅剩 PROGRESS 历史引用 ✓。
