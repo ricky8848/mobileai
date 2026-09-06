@@ -454,6 +454,7 @@ new dsh/
   - **手机端测试清单** = docs/GUIDE.md「0. 当前生产状态（2026-09-06 v0.4）」：
     ① DSH GUI（过 CF Access；**WS 已修，应不再无限重连**）② /mai 门户 + magic link
     → /me（页脚 v0.4）③ /mai/admin 管理台 ④ apex New API 网关确认
+    ⑤ i.sh 安装（banner v0.4）⑥ healthz → version:"0.4"。
 - **2026-09-06（续 · 公网路径投递矩阵全量核验）**：沿「验证插件 JS 能否经
   公网路径加载」轨迹逐层复验（Host=dsh.newapi.email 打 :6430，与直连 :3080
   逐项对照），**所有层 edge==direct**：
@@ -502,4 +503,14 @@ new dsh/
   /mai/healthz 不变。⚠ **教训**：curl 级公网路径验证必须复现浏览器标记头
   （Origin / Sec-Fetch-*），否则漏掉 header-fence 类 bug。**用户复测**：手机
   刷新后开文件夹（host.pickDirectory 应能弹出选择框）。
-    ⑤ i.sh 安装（banner v0.4）⑥ healthz → version:"0.4"。
+- **2026-09-06（续3 · 文档同步：/mai 安装地址 + 仓库改名残留）**：
+  - **docs/GUIDE.md L121-122 安装命令地址修正**：`https://newapi.email/i.sh|i.ps1`
+    （旧 apex 地址，/mai 迁移后唯一残留的内容差异）→ `https://dsh.newapi.email/
+    mai/i.sh|i.ps1`（与 client/src/guide.md 一致）。修复后两文件 diff = **仅剩
+    section 0**（生产状态，docs 独有设计）✓。
+  - **仓库改名残留**：client/src/mobileai.mjs + control/static/mobileai.mjs 头注释
+    「Audit me: …/ricky8848/mobile-ai」（2026-09-05 改名 DSH-MobileAI 时漏更两处）
+    → …/DSH-MobileAI。node --check ✓；control/static 与 client 单一事实源 diff
+    全一致（guide/i.sh/i.ps1/app.js/mobileai.mjs）✓。
+  - **全仓 grep**：旧仓库名 / 旧安装地址无残留（PROGRESS 历史记录与 Linux unit
+    名 `mobile-ai` 为业务命名，保留）。无代码逻辑改动。
