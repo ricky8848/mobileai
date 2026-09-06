@@ -480,4 +480,26 @@ new dsh/
   （过 CF Access）→ GUI 应正常加载且不再无限重连（= GUIDE 测试清单第①
   项）。可选手动项不变：Zero Trust（org jutixinxi）dashboard 加 URI
   Exclude /mai/*。本轮无代码改动，仅清理 workspace 临时调试文件并落库本条。
+- **2026-09-06（续2 · 手机「无法打开文件夹」修复：DSH /api 信任围栏 ×
+  公网 Origin）**：WS 修好后手机 dsh.newapi.email GUI 能打开，但点文件夹报
+  `transport failure for /api/host.pickDirectory: HTTP 403`。根因（edge WS bug
+  之后的**第二个头问题**）：DSH client-connection 的 /api **浏览器信任围栏**
+  （isTrustedApiRequest，防 DNS rebinding + cross-site）要求 **Origin 与 Host
+  精确一致**，且特权方法集（host.pickDirectory、host.openPath、settings.*、
+  credentials.*、llm.discoverModels）另要求 Host=loopback（trustedHosts=[]）。
+  edge 把 Host 改写成 127.0.0.1:3080，而公网浏览器请求带
+  `Origin: https://dsh.newapi.email` → **一切非 GET /api + WS 握手全 403**
+  （WS 握手按 RFC6455 同样携带 Origin）。此前「投递矩阵全量核验」用裸 curl
+  （无浏览器标记头）→ 漏检。**修复**（control/edge.mjs，kickstart
+  com.mobileai.edge）：proxy() 与 upgrade handler 在 DSH 分支**只剥离
+  origin** → 「无标记 loopback 请求」（围栏明确信任的形态；DSH 源码注释：
+  non-browser/remote clients pass via loopback，围栏不是 auth layer）；**保留
+  sec-fetch-site**（跨站嵌入 / DNS rebinding 仍被它拦——实测 direct +
+  Sec-Fetch-Site: cross-site = 依旧 403，防护未削弱）。auth 边界不变：CF
+  Access 登录墙 + edge 仅回环监听。**验证**：POST /api/settings.describe（特权
+  方法，只读）经 edge + 手机 Origin = **403→200**；WS /api/events.mux 经 edge
+  + 手机 Origin = **101 + session/subscribed 帧**；回归 HTML / SSE graph /
+  /mai/healthz 不变。⚠ **教训**：curl 级公网路径验证必须复现浏览器标记头
+  （Origin / Sec-Fetch-*），否则漏掉 header-fence 类 bug。**用户复测**：手机
+  刷新后开文件夹（host.pickDirectory 应能弹出选择框）。
     ⑤ i.sh 安装（banner v0.4）⑥ healthz → version:"0.4"。

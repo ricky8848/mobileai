@@ -9,7 +9,7 @@
 // 为什么需要它：一个 hostname 的 cloudflared ingress 只能指一个 service，
 // 「主域名 newapi.email 还给 New API 网关 + dsh.newapi.email 承载全部服务」
 // 只能在本地做路径分流。纯 node http，无依赖；SSE/流式响应直接 pipe（不缓冲），
-// WebSocket upgrade 透传。
+// WebSocket upgrade 透传；DSH 分支剥离浏览器 Origin（DSH /api 信任围栏，见 proxy() 注释）。
 //
 //   node edge.mjs          # http://127.0.0.1:6430
 //   EDGE_PORT=xxxx node edge.mjs
@@ -46,6 +46,15 @@ function proxy(req, res) {
   const headers = filterHeaders(req.headers);
   delete headers.host;
   headers.host = `${t.host}:${t.port}`;
+  // ⚠ DSH 分支剥离浏览器 Origin（2026-09-06 手机「无法打开文件夹」根因）：DSH /api
+  // 信任围栏（client-connection isTrustedApiRequest）要求 Origin 与 Host 精确一致，
+  // 特权方法（host.pickDirectory/settings.*…）另要求 Host=loopback。本服务把 Host
+  // 改写成 127.0.0.1:3080，而公网浏览器请求带 Origin: https://dsh.newapi.email
+  // → 一切非 GET /api + WS 握手全 403。剥离后 = 「无标记 loopback 请求」，围栏
+  // 明确信任（源码注释：non-browser/remote clients pass via loopback；围栏不是
+  // auth layer）。sec-fetch-site **保留**：跨站嵌入 / DNS rebinding 仍被它拦。
+  // auth 边界 = CF Access 登录墙 + 本服务仅回环监听。
+  if (t.port === DSH_PORT) delete headers.origin;
   if (!headers['x-forwarded-for']) headers['x-forwarded-for'] = req.socket.remoteAddress || '127.0.0.1';
   const up = http.request({ host: t.host, port: t.port, path: t.path, method: req.method, headers }, (pr) => {
     res.writeHead(pr.statusCode || 502, filterHeaders(pr.headers));
@@ -68,8 +77,10 @@ const server = http.createServer(proxy);
 server.on('upgrade', (req, socket, head) => {
   let u; try { u = new URL(req.url, 'http://127.0.0.1'); } catch { socket.destroy(); return; }
   const t = target(u);
+  // WS 握手同样携带浏览器 Origin（RFC6455）→ DSH 围栏对 upgrade 一样 403；
+  // 与 proxy() 同步剥离（仅 DSH 分支）。
   const reqLines = [`${req.method} ${t.path} HTTP/${req.httpVersion}`,
-    ...Object.entries(req.headers).map(([k, v]) => `${k}: ${v}`), '', ''];
+    ...Object.entries(req.headers).filter(([k]) => !(t.port === DSH_PORT && k.toLowerCase() === 'origin')).map(([k, v]) => `${k}: ${v}`), '', ''];
   const up = net.connect(t.port, t.host);
   up.on('connect', () => { up.write(reqLines.join('\r\n')); if (head && head.length) up.write(head); });
   const fail = () => { try { socket.destroy(); } catch {} };
