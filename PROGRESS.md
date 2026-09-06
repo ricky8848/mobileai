@@ -454,4 +454,30 @@ new dsh/
   - **手机端测试清单** = docs/GUIDE.md「0. 当前生产状态（2026-09-06 v0.4）」：
     ① DSH GUI（过 CF Access；**WS 已修，应不再无限重连**）② /mai 门户 + magic link
     → /me（页脚 v0.4）③ /mai/admin 管理台 ④ apex New API 网关确认
+- **2026-09-06（续 · 公网路径投递矩阵全量核验）**：沿「验证插件 JS 能否经
+  公网路径加载」轨迹逐层复验（Host=dsh.newapi.email 打 :6430，与直连 :3080
+  逐项对照），**所有层 edge==direct**：
+   · HTML shell：12076B 字节级一致（除 hash）；引用全相对路径（/assets/*、
+     favicon.svg、manifest.webmanifest），无 127.0.0.1 硬编码 ✓
+   · shell assets ×6（index/vendor JS+CSS、favicon.svg、manifest.webmanifest）：
+     全 200 且 size 一致 ✓
+   · SSE /plugins/events graph：两侧内容相同（rev=b1dfb10aadf9）；graph 内
+     **38 个**插件 client.js 全为相对 URL，逐一经 edge = 200 且 size 与直连
+     一致（轨迹抽验 4 个 → 扩为全量）✓
+   · **WS downlink ×2**（/api/events.mux、/api/events.host）：经 edge =
+     **101 Switching Protocols**，mux 立即下发 `session/subscribed` 事件帧
+     → 运行进程已是修复后代码（旧 HOP-filter bug 会回 426）；host 流 1.5s
+     内无帧（正常，当前无动态插件 host 事件）✓
+   · /mai/healthz 经 edge = {"ok":true,"version":"0.4"} ✓；公网 apex
+     newapi.email = 200 + x-new-api-version v1.0.0-rc.8（主域网关正常）✓
+   · cloudflared 日志复核：**无 426 / status 错误**；仅 07:30/07:51/
+     08:00Z 三次 /plugins/events stream cancel（正常页面生命周期，无高频
+     重连风暴）；QUIC conn 偶发 idle-timeout 自动重连（移动网络正常现象）
+     → 「无限重连」无残留 ✓
+  **结论**：本机可验证的各层全部正常；唯一无法免登录态验证的段是 CF
+  Access（公网未认证请求 = 302 → jutixinxi.cloudflareaccess.com 登录页，
+  设计使然）。**手机端最终验证 = 用户手动项**：开 https://dsh.newapi.email/
+  （过 CF Access）→ GUI 应正常加载且不再无限重连（= GUIDE 测试清单第①
+  项）。可选手动项不变：Zero Trust（org jutixinxi）dashboard 加 URI
+  Exclude /mai/*。本轮无代码改动，仅清理 workspace 临时调试文件并落库本条。
     ⑤ i.sh 安装（banner v0.4）⑥ healthz → version:"0.4"。
