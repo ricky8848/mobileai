@@ -16,7 +16,7 @@ set -euo pipefail
 BASE="${1:-${MOBILEAI_BASE:-https://dsh.newapi.email/mai}}"
 MAI_DIR="$HOME/.mobileai"
 
-echo "[mobile ai] 移动AI · installer (base: $BASE)"
+echo "[mobile ai] 移动AI v0.4 · installer (base: $BASE)"
 
 # ---- 1) Node >= 18 -----------------------------------------------------------
 if ! command -v node >/dev/null 2>&1; then

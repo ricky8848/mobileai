@@ -15,7 +15,7 @@ $ErrorActionPreference = 'Stop'
 $Base = if ($env:MOBILEAI_BASE) { $env:MOBILEAI_BASE } else { 'https://dsh.newapi.email/mai' }
 $Maid = Join-Path $env:USERPROFILE '.mobileai'
 
-Write-Host "[mobile ai] 移动AI · installer (base: $Base)"
+Write-Host "[mobile ai] 移动AI v0.4 · installer (base: $Base)"
 
 # ---- 1) Node >= 18 -------------------------------------------------------------
 try { $nodeVer = (& node -v).Trim() } catch {

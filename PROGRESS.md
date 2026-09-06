@@ -411,3 +411,47 @@ new dsh/
     重登 A、/me「我的工具」+专属 URL 渲染、门户轮换→新 URL、新 URL heartbeat ok、
     未登录轮换 401）+ smoke **16/16 PASS**。线上验证：/me「尚未绑定工具」卡 ✓、
     rotate 无会话 401 / 越权 id 404 ✓。控制面已重启加载（portal=…/mai）。
+- **2026-09-06** 手机端 dsh.newapi.email「无法使用」根因修复 + v0.4 瘦身定案（接管
+  「无限重连」对话的剩余任务；用户定案：不再注册探针插件、之前工作已完成、按 GitHub
+  现状做瘦身精简 + 保证正常运行）：
+  - **⚠ 手机端无限重连根因（edge.mjs 生产 bug，已修复）**：手机走
+    CF→dsh.newapi.email→edge(:6430)→DSH GUI，而 edge 的 **WebSocket upgrade handler
+    误用 HOP 过滤**（滤掉 `Connection: Upgrade` + `Upgrade: websocket`）→ raw socket
+    pipe 里上游收到的是**无 upgrade 的普通 HTTP GET** → DSH 回 **426 "upgrade
+    required"**（`/api/events.mux|events.host`）→ GUI 事件流全灭、浏览器无限重连。
+    **桌面直连 :3080 不受影响**（绕过 edge），故历次 E2E/smoke（不过 edge）与
+    9-05「本地路由 ✓」验 HTTP 路径时均未暴露——与 query string bug（续4）同类漏检。
+    **修复**：upgrade handler 请求头原样转发（不再过 HOP；HOP 过滤只适用
+    http.request 级代理）。**验证 ✓**：launchctl kickstart com.mobileai.edge →
+    curl 经 :6430 WS handshake = **101 Switching Protocols + session/subscribed
+    事件帧**；HTTP 回归（/mai/healthz、GUI __DSH_BOOT__、/api）不变。
+  - **v0.4 瘦身定案**（用户：不删仓库内容、加版本号、最简功能）：**只收敛展示层 +
+    版本体系，不删任何代码**：
+    · 客户端 `client/src/mobileai.mjs` VERSION `'0.1.0'→'0.4.0'`（/api/status.version
+      对外）；本地控制台页脚 v0.4；i.sh/i.ps1 banner「移动AI v0.4」。
+    · 控制面 `control/package.json` +version 0.4.0；site.js 新增导出
+      `VERSION='0.4'`（落地页//me/admin 三处页脚展示）；index.js **/healthz 增
+      version**（运维 curl 即知线上版本）。control/static/ 同步 i.sh+mobileai.mjs。
+    · **生产已重启加载**：com.mobileai.control kickstart → 本机 healthz
+      `{"ok":true,"service":"mobileai-control","version":"0.4"}`、落地页脚
+      「移动AI v0.4」✓。
+  - **DSH GUI 工具选项 preset（上一对话轨迹的收尾）**：`presets/{codex,openclaw,
+    hermes}/agent.cordis.yml`（= 标准 preset + persona：codex exec / openclaw agent
+    / Hermes 三文件长程纪律）已安装至 `~/.dsh/.agent-presets/`（+preset.yml 中文
+    name/description）；roster discovery 健康检查 **3 user + 4 system 全 ok**
+    （dsh-agent-presets discoverPresets；发现每次调用重读根 → **GUI 新会话页即时
+    可见，无需重启 dsh web**）。⚠ 仅 shape-check（用户要求不注册探针插件，未跑
+    standingKeyFor mount-validate）；preset 与 standard 逐行 diff = 仅头部注释+
+    persona，挂载风险极低——**用户建议各开一个会话确认工具列表**。presets/ 已入库
+    （可复现部署）。
+  - **回归**：smoke-server **16/16 PASS** + e2e-p7 **37 PASS / 0 FAIL**（v0.4 改动后
+    复跑全绿）。公网复核：dsh.newapi.email / 与 /mai/* → **302 CF Access**（墙仍在，
+    行为不变）；apex newapi.email = New API 网关正常（x-new-api-version ✓）。
+  - **用户手动项（可选但推荐，2 分钟）**：Zero Trust dashboard（**org jutixinxi**）
+    → Access → Applications → dsh.newapi.email → Policies 加 URI **Exclude** `/mai/*`
+    ——之后门户/安装脚本对公众自助开放（无需过邮箱验证墙）；DSH GUI 根路径保持
+    登录墙不变。API token 无该 org 权限，只能手动（本机 CF token ≠ jutixinxi）。
+  - **手机端测试清单** = docs/GUIDE.md「0. 当前生产状态（2026-09-06 v0.4）」：
+    ① DSH GUI（过 CF Access；**WS 已修，应不再无限重连**）② /mai 门户 + magic link
+    → /me（页脚 v0.4）③ /mai/admin 管理台 ④ apex New API 网关确认
+    ⑤ i.sh 安装（banner v0.4）⑥ healthz → version:"0.4"。

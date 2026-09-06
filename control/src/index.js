@@ -4,7 +4,7 @@ import { activate, heartbeat, rotate, issueCode, markOrderPaid, ensureUser, enqu
   paymentInfoFromEnv, createAdminSession, adminSessionOk, deleteAdminSession, revokeBinding, adminBindings,
   adminStats, ONLINE_WINDOW_MS } from './core.js';
 import { createStripeCheckout, handleStripeWebhook } from './stripe.js';
-import { landingPage, loginErrorPage, mePage, adminLoginPage, adminDashboard } from './site.js';
+import { landingPage, loginErrorPage, mePage, adminLoginPage, adminDashboard, VERSION } from './site.js';
 import { makeCf } from './cf.js';
 
 const json = (body, status = 200) =>
@@ -238,7 +238,7 @@ export default {
       return json({ error: 'not found' }, 404);
     }
 
-    if (url.pathname === '/' || url.pathname === '/healthz') return json({ ok: true, service: 'mobileai-control' });
+    if (url.pathname === '/' || url.pathname === '/healthz') return json({ ok: true, service: 'mobileai-control', version: VERSION });
     return json({ error: 'not found' }, 404);
   },
 };

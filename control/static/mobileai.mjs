@@ -20,7 +20,7 @@ import os from 'node:os';
 import { Readable } from 'node:stream'; // fetch 返回 Web stream，Node 侧写盘需 fromWeb
 import path from 'node:path';
 
-const VERSION = '0.1.0';
+const VERSION = '0.4.0'; // 产品版本（2026-09-06 v0.4：瘦身定案 + edge WS 修复；/api/status.version 对外）
 const HOME_DIR = path.join(os.homedir(), '.mobileai');
 const BIN_DIR = path.join(HOME_DIR, 'bin');
 const STATE_FILE = path.join(HOME_DIR, 'state.json');

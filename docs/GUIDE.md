@@ -5,7 +5,7 @@
 
 ---
 
-## 0. 当前生产状态（2026-09-05 修订版，测试前必读）
+## 0. 当前生产状态（2026-09-06 v0.4，测试前必读）
 
 ### 公网地址总表（均已全球可解析，含国内网络）
 
@@ -21,6 +21,17 @@
 **架构一句话**：`dsh.newapi.email → 本机 edge.mjs（:6430，launchd com.mobileai.edge）`
 按路径分流——`/mai/* → 门户 :6420（剥前缀）`，其余全部 `→ DSH GUI :3080`；
 cloudflared 隧道只认 hostname，所以本地必须有一个反代做路径分流。
+
+**2026-09-06 v0.4 变更（本轮）**：
+1. **修复手机端 DSH GUI「无限重连」**——edge.mjs 的 WebSocket upgrade handler
+   误滤掉 `Connection/Upgrade` 握手头 → `/api/events.*` 被降级成普通 HTTP（上游回
+   426）→ GUI 事件流全灭、浏览器不断重连（桌面直连 :3080 不受影响，故此前未发现）。
+   已修复并实测（经 edge WS → 101 + 事件帧正常）；**手机浏览器过 CF Access 后
+   DSH GUI 应恢复正常**。
+2. **版本号 v0.4**：门户页脚 / `healthz.version` / 客户端 `/api/status.version`
+   （本地控制台页脚同步）——运维 `curl -s …/mai/healthz` 即可确认线上版本。
+3. **DSH GUI 工具选项**（运营方机器）：新会话页可选 Codex / OpenClaw / Hermes
+   工具 preset（`~/.dsh/.agent-presets/`，仓库 `presets/` 留有副本）。
 
 **⚠ CF Access 说明（测试前必看）**：dsh.newapi.email 整个域名在 Zero Trust
 邮箱验证墙后（org jutixinxi，5月为 DSH GUI 所设）——**/mai/* 也在墙内**。
@@ -47,7 +58,7 @@ Policies 加 URI **Exclude** `/mai/*`（2 分钟，API token 无该 org 权限�
    ```
    → 自动下载组件 + 弹本地控制台。「认证码」在 /me 页获取（先确认收款/试用码）。
 6. **健康检查（任何设备终端）**：`curl -s https://dsh.newapi.email/mai/healthz`
-   → `{"ok":true,"service":"mobileai-control"}`（未过 CF Access 时返回 302 属正常）。
+   → `{"ok":true,"service":"mobileai-control","version":"0.4"}`（未过 CF Access 时返回 302 属正常）。
 
 ### 本机（家里 Mac）运维速查
 

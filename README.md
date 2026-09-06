@@ -145,7 +145,8 @@ irm https://dsh.newapi.email/mai/i.ps1 | iex
 |---|---|
 | v0.1 pilot ✅ | 单用户隧道 + Cloudflare Access 鉴权，手动开通 |
 | v0.2 ✅ | i.sh / i.ps1 一键客户端（浏览器控制台 + 机器码 + 心跳） |
-| v0.3 ✅（当前） | 自助门户：magic link / 认证码 / URL 轮换 + 自动发信 + Stripe（代码就绪） |
+| v0.3 ✅ | 自助门户：magic link / 认证码 / URL 轮换 + 自动发信 + Stripe（代码就绪） |
+| v0.4 ✅（当前） | 瘦身定案 + 版本号体系；修复手机端 DSH GUI 无限重连（edge WS upgrade bug）；DSH 工具选项 preset（Codex / OpenClaw / Hermes，见 `presets/`） |
 | v1.0 | 付费全自动上线（Stripe live key + webhook）+ 换机重绑自助化 + 自动客服 |
 
 ## License

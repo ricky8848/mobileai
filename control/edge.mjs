@@ -61,11 +61,15 @@ function proxy(req, res) {
 const server = http.createServer(proxy);
 
 // WebSocket upgrade 透传（DSH GUI / 门户若用 WS 也能穿过来）
+// ⚠ 握手头必须原样转发：Connection/Upgrade 是 handshake 的一部分。HOP 过滤只适用于
+// http.request 级代理（node 会重新发帧）；raw socket pipe 里滤掉它们 → 上游收到普通
+// HTTP GET（无 upgrade）→ DSH 回 426 "upgrade required" → GUI 事件流 WS 全灭、浏览器
+// 无限重连（2026-09-06 手机 dsh.newapi.email 无法使用的根因，此前 E2E 只验了 HTTP 路径）。
 server.on('upgrade', (req, socket, head) => {
   let u; try { u = new URL(req.url, 'http://127.0.0.1'); } catch { socket.destroy(); return; }
   const t = target(u);
   const reqLines = [`${req.method} ${t.path} HTTP/${req.httpVersion}`,
-    ...Object.entries(req.headers).filter(([k]) => !HOP.has(k.toLowerCase())).map(([k, v]) => `${k}: ${v}`), '', ''];
+    ...Object.entries(req.headers).map(([k, v]) => `${k}: ${v}`), '', ''];
   const up = net.connect(t.port, t.host);
   up.on('connect', () => { up.write(reqLines.join('\r\n')); if (head && head.length) up.write(head); });
   const fail = () => { try { socket.destroy(); } catch {} };

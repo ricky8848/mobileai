@@ -11,6 +11,11 @@ export function basePathOf(portalBase) {
   try { return new URL(String(portalBase || '')).pathname.replace(/\/+$/, ''); } catch { return ''; }
 }
 
+// 产品版本号（2026-09-06 v0.4：瘦身定案 + edge WS 修复）。门户页脚展示；
+// index.js /healthz 也引用它（运维 curl 即可确认线上版本）。客户端侧对应
+// client/src/mobileai.mjs VERSION（/api/status.version），两处保持同步。
+export const VERSION = '0.4';
+
 const CSS = `
 :root{--bg:#fff;--fg:#1d1d1f;--muted:#86868b;--border:rgba(0,0,0,.1);--btn:#1d1d1f;--btn-fg:#fff;
   --ok:#34c759;--warn:#ff9f0a;--err:#ff3b30}
@@ -94,7 +99,7 @@ export function landingPage(portalBase = '') {
 <li>家中电脑一条命令安装 → 填认证码 → 专属 URL 上线</li>
 </ol>
 </div>
-<footer>移动AI · newapi.email · 流量不经第三方服务器</footer>` + `
+<footer>移动AI v${VERSION} · newapi.email · 流量不经第三方服务器</footer>` + `
 <script>
 const BP=${BP}; // 门户 base path（子路径挂载；根部署为 ""）
 document.getElementById('go').onclick = async () => {
@@ -163,7 +168,7 @@ ${p.code ? `<div class="card">
 <span class="badge ${p.code.status === 'redeemed' ? '' : 'ok'}">${p.code.status === 'redeemed' ? '已使用' : '未使用'}</span></div>
 </div>` : '<p style="font-size:13px;color:var(--muted)">暂无认证码 — 付款确认后自动发放。</p>'}
 ${toolsCard}
-<footer>移动AI · newapi.email</footer>` + `
+<footer>移动AI v${VERSION} · newapi.email</footer>` + `
 <script>function copyCode(el){navigator.clipboard.writeText('${p.code ? esc(p.code.code) : ''}').then(()=>{el.textContent='已复制 ✓';setTimeout(()=>el.textContent='复制',1500)})}
 document.body.addEventListener('click',async ev=>{const btn=ev.target.closest('button[data-act="rotatetool"]');if(!btn)return;
  btn.disabled=true;const r=await fetch('${bp}/site/tools/rotate',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:btn.dataset.id})});
@@ -290,7 +295,7 @@ export function adminDashboard(portalBase) {
 <p id="mail-modal-meta" style="font-size:12px;color:#86868b;margin-bottom:8px"></p>
 <pre id="mail-modal-body" style="white-space:pre-wrap;word-break:break-all;font-size:13px;background:rgba(125,125,130,.08);border-radius:10px;padding:14px;max-height:60vh;overflow:auto;margin:0"></pre>
 </div></div>
-<footer>移动AI 管理端 · ${esc(portalBase || '')}</footer>` + `
+<footer>移动AI v${VERSION} 管理端 · ${esc(portalBase || '')}</footer>` + `
 <script>
 const BP=${JSON.stringify(bp)}; // 门户 base path（子路径挂载；根部署为 ""）
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
